@@ -1,3 +1,5 @@
+from datetime import date
+
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -32,8 +34,23 @@ db = firestore.client()
 # })
 
 # Read data
-users_ref = db.collection(u'users')
-docs = users_ref.stream()
-
+teams_ref = db.collection(u'teams')
+docs = teams_ref.stream()
 for doc in docs:
     print(f'{doc.id} => {doc.to_dict()}')
+
+# # Query data
+# fixtures_ref = db.collection(u'fixtures')
+# docs = fixtures_ref.stream()
+#
+# today = date.today()
+# print("Today's date:", today.isoformat())
+#
+# # Create a query against the collection
+# past_games_query_ref = fixtures_ref.where(u'fixture.date', u'<', today.isoformat())
+# upcoming_games_query_ref = fixtures_ref.where(u'fixture.date', u'>=', today.isoformat())
+#
+# query = upcoming_games_query_ref.stream()
+#
+# for doc in query:
+#     print(f'{doc.id} => {doc.to_dict()}')
