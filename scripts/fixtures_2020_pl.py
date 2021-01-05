@@ -8,7 +8,7 @@ import json
 
 def connect_db():
     # Use a service account
-    cred = credentials.Certificate('better-gsts-60715c303402.json')
+    cred = credentials.Certificate('../better-gsts-60715c303402.json')
     firebase_admin.initialize_app(cred)
 
     db = firestore.client()
@@ -39,7 +39,7 @@ def fetch_data_from_api(url):
 db = connect_db()
 
 ############################ FETCH DATA USING API OR JSON FILE #########################################################
-obj = fetch_data_from_file(file_name='json/fixtures_2020_pl.json')
+obj = fetch_data_from_file(file_name='../json/fixtures_2020_pl.json')
 # obj = fetch_data_from_api(url='https://v3.football.api-sports.io/fixtures?season=2020&league=39')
 
 
