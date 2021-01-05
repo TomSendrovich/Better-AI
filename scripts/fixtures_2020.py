@@ -1,9 +1,9 @@
+import json
+
 import firebase_admin
 import requests
 from firebase_admin import credentials
 from firebase_admin import firestore
-
-import json
 
 
 def connect_db():
@@ -59,8 +59,8 @@ for json_obj in response:
     goals = json_obj["goals"]
     score = json_obj["score"]
 
-    doc_ref.set({f'fixture': fixture})
-    doc_ref.set({f'league': league})
-    doc_ref.set({f'teams': teams})
-    doc_ref.set({f'goals': goals})
-    doc_ref.set({f'score': score})
+    doc_ref.set({f'fixture': fixture}, merge=True)
+    doc_ref.set({f'league': league}, merge=True)
+    doc_ref.set({f'teams': teams}, merge=True)
+    doc_ref.set({f'goals': goals}, merge=True)
+    doc_ref.set({f'score': score}, merge=True)
