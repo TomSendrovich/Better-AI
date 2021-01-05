@@ -1,3 +1,4 @@
+import datetime
 from datetime import date
 
 import firebase_admin
@@ -33,24 +34,30 @@ db = firestore.client()
 #     u'born': 1912
 # })
 
-# Read data
-teams_ref = db.collection(u'teams')
-docs = teams_ref.stream()
-for doc in docs:
-    print(f'{doc.id} => {doc.to_dict()}')
-
-# # Query data
-# fixtures_ref = db.collection(u'fixtures')
-# docs = fixtures_ref.stream()
-#
-# today = date.today()
-# print("Today's date:", today.isoformat())
-#
-# # Create a query against the collection
-# past_games_query_ref = fixtures_ref.where(u'fixture.date', u'<', today.isoformat())
-# upcoming_games_query_ref = fixtures_ref.where(u'fixture.date', u'>=', today.isoformat())
-#
-# query = upcoming_games_query_ref.stream()
-#
-# for doc in query:
+# # Read data
+# teams_ref = db.collection(u'teams')
+# docs = teams_ref.stream()
+# for doc in docs:
 #     print(f'{doc.id} => {doc.to_dict()}')
+
+# Query data
+fixtures_ref = db.collection(u'fixtures')
+docs = fixtures_ref.stream()
+
+today = date.today()
+one_week = datetime.timedelta(days=7)
+next_week = today + one_week
+print("Today's date:", today.isoformat())
+print("Next week's date:", next_week.isoformat())
+
+# Create a query against the collection
+past_games_query_ref = fixtures_ref.where(u'fixture.date', u'<', today.isoformat())
+
+upcoming_games_query_ref = fixtures_ref \
+    .where(u'fixture.date', u'>=', today.isoformat()) \
+    .where(u'fixture.date', u'<=', next_week.isoformat())
+
+query = upcoming_games_query_ref.stream()
+
+for doc in query:
+    print(f'{doc.id} => {doc.to_dict()}')
