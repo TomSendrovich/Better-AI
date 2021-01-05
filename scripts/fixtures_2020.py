@@ -35,32 +35,63 @@ def fetch_data_from_api(url):
     return obj
 
 
-############################ CONNECT FIRESTORE DB ######################################################################
-db = connect_db()
+def update_fixtures(request_args):
+    # check arg 'league_id'. mandatory
+    if request_args and 'league_id' in request_args:
+        league_id = request_args['league_id']
+    else:
+        msg = 'Error: league_id parameter is missing'
+        print(msg)
+        return msg
 
-############################ FETCH DATA USING API OR JSON FILE #########################################################
-obj = fetch_data_from_file(file_name='../json/fixtures_2020_pl.json')
-# obj = fetch_data_from_api(url='https://v3.football.api-sports.io/fixtures?season=2020&league=39')
+    # check args 'from' and 'to'. no mandatory
+    if request_args and 'from' in request_args and 'to' in request_args:
+        param_from = request_args['from']
+        param_to = request_args['to']
+        date_filter = True
+    else:
+        date_filter = False
+
+    # build url from request args
+    if date_filter:
+        url = f'https://v3.football.api-sports.io/fixtures?season=2020&league={league_id}&from={param_from}&to={param_to}'
+    else:
+        url = f'https://v3.football.api-sports.io/fixtures?season=2020&league={league_id}&last=10'
+
+    # connect db
+    db = connect_db()
+
+    # get json response
+    obj = fetch_data_from_api(url=url)
+    response = obj['response']
+    # obj = fetch_data_from_file(file_name='../json/fixtures_2020_pl.json')
+
+    for json_obj in response:
+        fixture_id = json_obj["fixture"]["id"]
+        fixture_date = (json_obj["fixture"]["date"]).split(':')[0]
+        print(f'{fixture_date}-{fixture_id}')
+
+        doc_ref = db.collection(u'fixtures').document(f'{fixture_date}-{fixture_id}')
+
+        fixture = json_obj["fixture"]
+        league = json_obj["league"]
+        teams = json_obj["teams"]
+        goals = json_obj["goals"]
+        score = json_obj["score"]
+
+        doc_ref.set({f'fixture': fixture}, merge=True)
+        doc_ref.set({f'league': league}, merge=True)
+        doc_ref.set({f'teams': teams}, merge=True)
+        doc_ref.set({f'goals': goals}, merge=True)
+        doc_ref.set({f'score': score}, merge=True)
+
+    if date_filter:
+        res = f'Success: league_id={league_id}, from={param_from}, to={param_to}'
+    else:
+        res = f'Success: league_id={league_id}'
+    print(res)
+    return res
 
 
-############################ FROM HERE IS DIFFERENT PER SCRIPT #########################################################
-response = obj['response']
-
-for json_obj in response:
-    fixture_id = json_obj["fixture"]["id"]
-    fixture_date = (json_obj["fixture"]["date"]).split(':')[0]
-    print(f'{fixture_date}-{fixture_id}')
-
-    doc_ref = db.collection(u'fixtures').document(f'{fixture_date}-{fixture_id}')
-
-    fixture = json_obj["fixture"]
-    league = json_obj["league"]
-    teams = json_obj["teams"]
-    goals = json_obj["goals"]
-    score = json_obj["score"]
-
-    doc_ref.set({f'fixture': fixture}, merge=True)
-    doc_ref.set({f'league': league}, merge=True)
-    doc_ref.set({f'teams': teams}, merge=True)
-    doc_ref.set({f'goals': goals}, merge=True)
-    doc_ref.set({f'score': score}, merge=True)
+args = {'league_id': 39, 'from': '2021-01-04', 'to': '2021-01-07'}
+update_fixtures(args)
