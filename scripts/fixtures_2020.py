@@ -60,16 +60,23 @@ def update_fixtures(request_args):
 
     # connect db
     db = connect_db()
+    batch = db.batch()
 
     # get json response
-    obj = fetch_data_from_api(url=url)
+    # obj = fetch_data_from_api(url=url)
+    obj = fetch_data_from_file(file_name='../json/fixtures_2020_pl.json')
     response = obj['response']
-    # obj = fetch_data_from_file(file_name='../json/fixtures_2020_pl.json')
+    results_count = obj['results']
+
+    count = 0
 
     for json_obj in response:
+        count = count + 1
+
         fixture_id = json_obj["fixture"]["id"]
         fixture_date = (json_obj["fixture"]["date"]).split(':')[0]
-        print(f'{fixture_date}-{fixture_id}')
+
+        print(f'{fixture_date}-{fixture_id}, {count / results_count * 100:.2f}%')
 
         doc_ref = db.collection(u'fixtures').document(f'{fixture_date}-{fixture_id}')
 
@@ -79,12 +86,20 @@ def update_fixtures(request_args):
         goals = json_obj["goals"]
         score = json_obj["score"]
 
-        doc_ref.set({f'fixture': fixture}, merge=True)
-        doc_ref.set({f'league': league}, merge=True)
-        doc_ref.set({f'teams': teams}, merge=True)
-        doc_ref.set({f'goals': goals}, merge=True)
-        doc_ref.set({f'score': score}, merge=True)
+        # each batch.set is 1 operation
+        batch.set(doc_ref, {f'fixture': fixture}, merge=True)
+        batch.set(doc_ref, {f'league': league}, merge=True)
+        batch.set(doc_ref, {f'teams': teams}, merge=True)
+        batch.set(doc_ref, {f'goals': goals}, merge=True)
+        batch.set(doc_ref, {f'score': score}, merge=True)
 
+        # commit every X documents for better performance (max is 500 operations per batch)
+        if count % 50 == 0:
+            batch.commit()
+
+    batch.commit()  # commit the rest of oeprations
+
+    # print a summary line
     if date_filter:
         res = f'Success: league_id={league_id}, from={param_from}, to={param_to}'
     else:
