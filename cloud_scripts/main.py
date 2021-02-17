@@ -1,4 +1,6 @@
+import datetime
 import json
+from datetime import date
 
 import google.cloud.firestore
 import requests
@@ -87,11 +89,40 @@ def update_fixtures(request):
 
     # print a summary line
     if date_filter:
-        res = f'Success: league_id={league_id}, from={param_from}, to={param_to}'
+        res = f'Success for {count} fixtures: league_id={league_id}, from={param_from}, to={param_to}'
     else:
-        res = f'Success: league_id={league_id}'
+        res = f'Success for {count} fixtures: league_id={league_id}'
     print(res)
     return res
+
+
+# to deploy function from console: 'gcloud functions deploy cron'
+def cron(request):
+    request_args = request.args
+
+    # check arg 'league_id'. mandatory
+    if request_args and 'league_id' in request_args:
+        league_id = request_args['league_id']
+    else:
+        msg = 'Error: league_id parameter is missing'
+        print(msg)
+        return msg
+
+    today = date.today()
+    one_day = datetime.timedelta(days=1)
+    yesterday = today - one_day
+
+    url = f'https://us-central1-better-gsts.cloudfunctions.net/update_fixtures' \
+          f'?league_id={league_id}&from={yesterday.isoformat()}&to={today.isoformat()}'
+
+    payload = {}
+    headers = {
+        'x-rapidapi-host': 'v3.football.api-sports.io',
+        'x-rapidapi-key': '5453c6e17010446f88dab41a62c97a53'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+    return response.text
 
 
 def hello_http(request):
