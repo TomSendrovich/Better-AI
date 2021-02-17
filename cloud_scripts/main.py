@@ -19,6 +19,7 @@ def fetch_data_from_api(url):
     return obj
 
 
+# to deploy function from console: 'gcloud functions deploy update_fixtures'
 def update_fixtures(request):
     request_args = request.args
 
