@@ -42,7 +42,7 @@ def update_fixtures(request):
     if date_filter:
         url = f'https://v3.football.api-sports.io/fixtures?season=2020&league={league_id}&from={param_from}&to={param_to}'
     else:
-        url = f'https://v3.football.api-sports.io/fixtures?season=2020&league={league_id}&last=10'
+        url = f'https://v3.football.api-sports.io/fixtures?season=2020&league={league_id}'
 
     # connect db
     db = google.cloud.firestore.Client()
