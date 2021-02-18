@@ -101,9 +101,9 @@ def update_fixtures(request_args):
 
     # print a summary line
     if date_filter:
-        res = f'Success: league_id={league_id}, from={param_from}, to={param_to}'
+        res = f'Success for {count} fixtures: league_id={league_id}, from={param_from}, to={param_to}'
     else:
-        res = f'Success: league_id={league_id}'
+        res = f'Success for {count} fixtures: league_id={league_id}'
     print(res)
     return res
 
