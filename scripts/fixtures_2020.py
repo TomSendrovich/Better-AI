@@ -78,7 +78,7 @@ def update_fixtures(request_args):
 
         print(f'{fixture_date}-{fixture_id}, {count / results_count * 100:.2f}%')
 
-        doc_ref = db.collection(u'fixtures').document(f'{fixture_date}-{fixture_id}')
+        doc_ref = db.collection(u'fixtures').document(f'{fixture_id}')
 
         fixture = json_obj["fixture"]
         league = json_obj["league"]
@@ -87,14 +87,16 @@ def update_fixtures(request_args):
         score = json_obj["score"]
 
         # each batch.set is 1 operation
-        batch.set(doc_ref, {f'fixture': fixture}, merge=True)
-        batch.set(doc_ref, {f'league': league}, merge=True)
-        batch.set(doc_ref, {f'teams': teams}, merge=True)
-        batch.set(doc_ref, {f'goals': goals}, merge=True)
-        batch.set(doc_ref, {f'score': score}, merge=True)
+        batch.set(doc_ref, {
+            'fixture': fixture,
+            'league': league,
+            'teams': teams,
+            'goals': goals,
+            'score': score,
+        })
 
         # commit every X documents for better performance (max is 500 operations per batch)
-        if count % 50 == 0:
+        if count % 400 == 0:
             batch.commit()
 
     batch.commit()  # commit the rest of oeprations

@@ -45,17 +45,17 @@ fixtures_ref = db.collection(u'fixtures')
 docs = fixtures_ref.stream()
 
 today = date.today()
-one_week = datetime.timedelta(days=7)
-next_week = today + one_week
+one_week = datetime.timedelta(days=-7)
+last_week = today + one_week
 print("Today's date:", today.isoformat())
-print("Next week's date:", next_week.isoformat())
+print("Last week's date:", last_week.isoformat())
 
 # Create a query against the collection
 past_games_query_ref = fixtures_ref.where(u'fixture.date', u'<', today.isoformat())
 
 upcoming_games_query_ref = fixtures_ref \
-    .where(u'fixture.date', u'>=', today.isoformat()) \
-    .where(u'fixture.date', u'<=', next_week.isoformat())
+    .where(u'fixture.date', u'>=', last_week.isoformat()) \
+    .where(u'fixture.date', u'<=', today.isoformat())
 
 query = upcoming_games_query_ref.stream()
 

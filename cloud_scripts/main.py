@@ -75,14 +75,16 @@ def update_fixtures(request):
         score = json_obj["score"]
 
         # each batch.set is 1 operation
-        batch.set(doc_ref, {f'fixture': fixture}, merge=True)
-        batch.set(doc_ref, {f'league': league}, merge=True)
-        batch.set(doc_ref, {f'teams': teams}, merge=True)
-        batch.set(doc_ref, {f'goals': goals}, merge=True)
-        batch.set(doc_ref, {f'score': score}, merge=True)
+        batch.set(doc_ref, {
+            'fixture': fixture,
+            'league': league,
+            'teams': teams,
+            'goals': goals,
+            'score': score,
+        })
 
         # commit every X documents for better performance (max is 500 operations per batch)
-        if count % 50 == 0:
+        if count % 400 == 0:
             batch.commit()
 
     batch.commit()  # commit the rest of oeprations
@@ -109,8 +111,8 @@ def cron(request):
         return msg
 
     today = date.today()
-    one_day = datetime.timedelta(days=1)
-    yesterday = today - one_day
+    minus_one_day = datetime.timedelta(days=-1)
+    yesterday = today + minus_one_day
 
     url = f'https://us-central1-better-gsts.cloudfunctions.net/update_fixtures' \
           f'?league_id={league_id}&from={yesterday.isoformat()}&to={today.isoformat()}'
