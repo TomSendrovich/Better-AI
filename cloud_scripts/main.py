@@ -66,7 +66,7 @@ def update_fixtures(request):
 
         print(f'{fixture_date}-{fixture_id}, {count / results_count * 100:.2f}%')
 
-        doc_ref = db.collection('fixtures').document(f'{fixture_date}-{fixture_id}')
+        doc_ref = db.collection(u'fixtures').document(f'{fixture_id}')
 
         fixture = json_obj["fixture"]
         league = json_obj["league"]
