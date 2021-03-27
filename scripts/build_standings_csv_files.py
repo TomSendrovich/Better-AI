@@ -1,3 +1,4 @@
+import os
 import re
 
 from urllib.request import urlopen
@@ -11,7 +12,7 @@ real_tr_pattern = "img"
 tr_flags = re.S
 
 
-def fetch_data(url):
+def fetch_data(url, league, season):
     # get HTML from url
     page = urlopen(url)
     html_bytes = page.read()
@@ -31,14 +32,27 @@ def fetch_data(url):
     tr_list = re.findall(tr_pattern, table, re.S)
 
     # open new file
-    f = open(title + ".csv", "w")
+    f = open(os.pardir + os.path.sep +
+             "standings_csv" + os.path.sep +
+             league + os.path.sep +
+             str(season) + os.path.sep +
+             title + ".csv", "w")
+
     f.write('#,Team,M,W,D,L,Goals,Diff,Pts\n')
 
+    last_pos = 1
     for tr in tr_list:
         if len(re.findall(real_tr_pattern, tr)) != 0:
             team_name = re.findall(team_name_pattern, tr)[0]
             values = re.findall(team_values_pattern, tr)
-            f.write(values[0])
+
+            pos = values[0]
+            if pos == '&nbsp;':
+                pos = last_pos
+
+            last_pos = pos
+
+            f.write(pos)
             f.write(',' + team_name)
             f.write(',' + values[1])
             f.write(',' + values[2])
@@ -68,13 +82,13 @@ def build_url2(league, season, rnd):
 for season in range(2010, 2021):
     for rnd in range(1, 39):
         url = build_url("eng-premier-league", season, rnd)
-        fetch_data(url)
+        fetch_data(url, "PL", season)
 
 # esp-primera-division
-for season in range(2010, 2021):
+for season in range(2010, 2020):
     for rnd in range(1, 39):
         url = build_url("esp-primera-division", season, rnd)
         if season == 2016:
             url = build_url2("esp-primera-division", season, rnd)
 
-        fetch_data(url)
+        fetch_data(url, "PD", season)
