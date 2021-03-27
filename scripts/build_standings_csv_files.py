@@ -85,7 +85,7 @@ for season in range(2010, 2021):
         fetch_data(url, "PL", season)
 
 # esp-primera-division
-for season in range(2010, 2020):
+for season in range(2010, 2021):
     for rnd in range(1, 39):
         url = build_url("esp-primera-division", season, rnd)
         if season == 2016:
