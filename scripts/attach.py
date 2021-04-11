@@ -5,10 +5,43 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 
 
+def skip_fixture(data):
+    status = data['fixture']['status']['short']
+    if status == 'NS' or status == 'PST':
+        return True
+    return False
+
+
 def DB_name_to_CSV_name(name):
+    """
+    string in expression is from DB
+    string in return is from csv files
+    """
+
     if name == 'Wolves':
         return 'Wolverhampton Wanderers'
-
+    if name == 'Atletico Madrid':
+        return 'Atlético Madrid'
+    if name == 'Athletic Club':
+        return 'Athletic Bilbao'
+    if name == 'Deportivo La Coruna':
+        return 'Deportivo La Coruña'
+    if name == 'Malaga':
+        return 'Málaga CF'
+    if name == 'Alaves':
+        return 'CD Alavés'
+    if name == 'Leganes':
+        return 'CD Leganés'
+    if name == 'Sporting Gijon':
+        return 'Sporting Gijón'
+    if name == 'Sheffield Utd':
+        return 'Sheffield United'
+    if name == 'QPR':
+        return 'Queens Park Rangers'
+    if name == 'Almeria':
+        return 'UD Almería'
+    if name == 'Cordoba':
+        return 'Córdoba CF'
     return name
 
 
@@ -23,7 +56,9 @@ fixtures_ref = db.collection(u'fixtures')
 docs = fixtures_ref.stream()
 
 # Create a query against the collection
-ref = fixtures_ref.where('fixture.id', '<=', 100)
+ref = fixtures_ref \
+    .where('fixture.id', '>=', 0) \
+    .where('fixture.id', '<=', 600000)
 
 query = ref.stream()
 
@@ -35,6 +70,9 @@ f2.write("HT,HR,HW,HL,HD,HGF,HGA,HS,AT,AR,AW,AL,AD,AGF,AGA,AS,W\n")
 for doc in query:
     print(doc.id)
     data = doc.to_dict()
+
+    if skip_fixture(data):
+        continue
 
     home = data['teams']['home']['name']
     away = data['teams']['away']['name']
@@ -53,7 +91,7 @@ for doc in query:
 
     file_name = '%s %d-%d - %d' % (full_league, season, season + 1, int(season_round) - 1)
 
-    if season_round != '1':
+    if season_round != '1' and season_round != '0':
         f = open(os.pardir + os.path.sep +
                  "standings_csv" + os.path.sep +
                  league + os.path.sep +
