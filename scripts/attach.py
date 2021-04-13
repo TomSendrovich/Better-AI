@@ -4,10 +4,12 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
+LEAGUE = "Primera Division"
+
 
 def skip_fixture(data):
     status = data['fixture']['status']['short']
-    if status == 'NS' or status == 'PST':
+    if status == 'NS' or status == 'PST' or status == 'TBD':
         return True
     return False
 
@@ -42,6 +44,8 @@ def DB_name_to_CSV_name(name):
         return 'UD Almería'
     if name == 'Cordoba':
         return 'Córdoba CF'
+    if name == 'Cadiz':
+        return 'Cádiz CF'
     return name
 
 
@@ -57,13 +61,12 @@ docs = fixtures_ref.stream()
 
 # Create a query against the collection
 ref = fixtures_ref \
-    .where('fixture.id', '>=', 0) \
-    .where('fixture.id', '<=', 600000)
+    .where('league.name', '==', LEAGUE)
 
 query = ref.stream()
 
 f2 = open(os.pardir + os.path.sep +
-          'combined' + '.csv', 'w')
+          LEAGUE + '.csv', 'w')
 
 f2.write("HT,HR,HW,HL,HD,HGF,HGA,HS,AT,AR,AW,AL,AD,AGF,AGA,AS,W\n")
 
