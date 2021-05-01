@@ -3719,6 +3719,37 @@ Real Madrid,0,0,0,0,0,0,2,Barcelona,0,0,0,0,0,0,1,1
 Valencia,0,0,0,0,0,0,2,Real Sociedad,0,0,0,0,0,0,2,0
 Valladolid,0,0,0,0,0,0,1,Granada CF,0,0,0,0,0,0,2,2
 Villarreal,0,0,0,0,0,0,1,Osasuna,0,0,0,0,0,0,2,2
+Alaves,0,0,0,0,0,0,2,Villarreal,0,0,0,0,0,0,1,1
+Atletico Madrid,0,0,0,0,0,0,2,Huesca,0,0,0,0,0,0,0,1
+Barcelona,0,0,0,0,0,0,5,Getafe,0,0,0,0,0,0,2,1
+Real Betis,0,0,0,0,0,0,0,Athletic Club,0,0,0,0,0,0,0,0
+Cadiz,0,0,0,0,0,0,0,Real Madrid,0,0,0,0,0,0,3,2
+Granada CF,0,0,0,0,0,0,4,Eibar,0,0,0,0,0,0,1,1
+Levante,0,0,0,0,0,0,0,Sevilla,0,0,0,0,0,0,1,2
+Osasuna,0,0,0,0,0,0,3,Valencia,0,0,0,0,0,0,1,1
+Real Sociedad,0,0,0,0,0,0,2,Celta Vigo,0,0,0,0,0,0,1,1
+Elche,0,0,0,0,0,0,1,Valladolid,0,0,0,0,0,0,1,0
+Athletic Club,19,0,1,0,0,2,2,Atletico Madrid,3,1,0,0,2,0,1,1
+Celta Vigo,12,0,0,1,0,0,2,Osasuna,3,1,0,0,2,0,1,1
+Eibar,12,0,0,1,0,0,0,Real Sociedad,8,0,0,1,1,1,1,2
+Huesca,8,0,0,1,1,1,0,Getafe,15,0,1,0,0,2,2,2
+Real Madrid,3,1,0,0,2,0,0,Real Betis,7,1,0,0,1,0,0,0
+Sevilla,15,0,1,0,0,2,2,Granada CF,3,1,0,0,2,0,1,1
+Valencia,2,1,0,0,4,2,1,Alaves,14,0,1,0,0,1,1,0
+Valladolid,8,0,0,1,1,1,1,Cadiz,15,0,1,0,0,2,1,0
+Villarreal,8,0,0,1,1,1,1,Barcelona,1,1,0,0,3,0,2,2
+Elche,18,0,1,0,0,3,1,Levante,20,0,1,0,2,4,0,1
+Alaves,18,0,2,0,1,3,1,Huesca,15,0,1,1,1,3,0,1
+Athletic Club,20,0,2,0,2,5,2,Valladolid,15,0,1,1,1,3,2,0
+Atletico Madrid,4,1,0,1,3,1,5,Eibar,14,0,1,1,1,2,0,1
+Barcelona,1,2,0,0,6,2,1,Granada CF,2,2,0,0,4,1,2,2
+Real Betis,3,2,0,0,3,0,2,Valencia,8,1,1,0,5,4,2,0
+Getafe,12,1,1,0,1,2,0,Real Madrid,5,1,0,1,2,0,0,0
+Cadiz,10,1,1,0,2,2,0,Celta Vigo,7,1,0,1,2,1,0,0
+Levante,17,0,1,1,3,5,1,Villarreal,6,1,0,1,3,2,5,2
+Osasuna,9,1,1,0,2,1,2,Elche,19,0,2,0,0,5,0,1
+Real Sociedad,13,0,0,2,1,1,1,Sevilla,10,1,1,0,2,2,2,2
+Celta Vigo,8,1,0,2,3,2,2,Levante,12,1,1,1,6,6,0,1
 Barcelona,13,2,3,2,7,11,1,Real Sociedad,9,3,3,1,17,17,0,1
 Atletico Madrid,4,4,0,3,12,4,2,Eibar,18,2,5,0,3,17,2,0
 Athletic Club,12,2,3,2,9,9,0,Espanyol,13,2,3,2,7,11,1,2

@@ -4,7 +4,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
-LEAGUE = "Primera Division"
+LEAGUE = "Premier League"
 
 
 def skip_fixture(data):
