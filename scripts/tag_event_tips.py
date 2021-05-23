@@ -1,5 +1,5 @@
-import os
-
+import datetime
+from datetime import date
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -43,8 +43,11 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Query data
-tips_ref = db.collection(u'eventTips')
-docs = tips_ref.stream()
+tips_ref = db.collection('eventTips')
+ref = tips_ref \
+    .where('created', '>=', datetime.datetime(2021, 5, 14))
+
+docs = ref.stream()
 
 cache = {}
 count = 0
