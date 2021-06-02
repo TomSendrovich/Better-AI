@@ -127,6 +127,95 @@ def cron(request):
     return response.text
 
 
+def skip_fixture(data):
+    status = data['fixture']['status']['short']
+    if status == 'NS' or status == 'PST' or status == 'TBD':
+        return True
+    return False
+
+
+def get_winner_from_fixture(fixtureID):
+    db = google.cloud.firestore.Client()
+    fixtures_ref = db.collection(u'fixtures')
+
+    ref = fixtures_ref \
+        .where('fixture.id', '==', fixtureID)
+
+    query = ref.stream()
+
+    for doc in query:
+        data = doc.to_dict()
+
+        if skip_fixture(data):
+            return None
+
+        home = data['teams']['home']['winner']
+        away = data['teams']['away']['winner']
+
+        if home:
+            return 1
+        if away:
+            return 2
+        return 0
+
+
+# to deploy function from console: 'gcloud functions deploy tag_tips'
+def tag_tips(request):
+    request_args = request.args
+
+    # check arg 'league_id'. mandatory
+    if request_args and 'date' in request_args:
+        date = request_args['date']
+        year = date.split('-')[0]
+        month = date.split('-')[1]
+        day = date.split('-')[2]
+    else:
+        date = datetime.datetime.now()
+        iso = date.__str__().split(' ')[0]
+        year = iso.split('-')[0]
+        month = iso.split('-')[1]
+        day = iso.split('-')[2]
+
+    db = google.cloud.firestore.Client()
+
+    # Query data
+    tips_ref = db.collection('eventTips')
+    ref = tips_ref \
+        .where('created', '>=', datetime.datetime(int(year), int(month), int(day)))
+
+    docs = ref.stream()
+
+    cache = {}
+    count = 0
+
+    for doc in docs:
+        count = count + 1
+        data = doc.to_dict()
+
+        fixtureID = data['fixture']
+        print("ID:", fixtureID)
+
+        if fixtureID in cache:
+            winner = cache[fixtureID]
+        else:
+            winner = get_winner_from_fixture(fixtureID)
+            cache[fixtureID] = winner
+
+        print("query count:", count, "cache size:", len(cache))
+
+        if winner is not None:
+            hit = winner == data['tipValue']
+
+            doc_ref = db.collection(u'eventTips').document(doc.id)
+
+            doc_ref.set({
+                'isHit': hit
+            }, merge=True)
+
+    retval = 'date:{0}-{1}-{2}, query count:{3}, cache size:{4}'.format(year, month, day, count, len(cache))
+    return retval
+
+
 def hello_http(request):
     """HTTP Cloud Function.
     Args:
