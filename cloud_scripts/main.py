@@ -117,11 +117,17 @@ def cron(request):
     url = f'https://us-central1-better-gsts.cloudfunctions.net/update_fixtures' \
           f'?league_id={league_id}&from={yesterday.isoformat()}&to={today.isoformat()}'
 
+    url2 = f'https://us-central1-better-gsts.cloudfunctions.net/tag_tips' \
+           f'?date={yesterday.isoformat()}'
+
     payload = {}
     headers = {
         'x-rapidapi-host': 'v3.football.api-sports.io',
         'x-rapidapi-key': '5453c6e17010446f88dab41a62c97a53'
     }
+
+    response = requests.request("GET", url2, headers=headers, data=payload)
+    print(response.text)
 
     response = requests.request("GET", url, headers=headers, data=payload)
     return response.text
