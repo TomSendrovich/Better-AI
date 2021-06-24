@@ -1,4 +1,5 @@
 requests
 google.cloud.firestore
+google.cloud.storage
 flask
 functions-framework==2.1.3

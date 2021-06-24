@@ -3,6 +3,7 @@ import json
 from datetime import date
 
 import google.cloud.firestore
+import google.cloud.storage
 import requests
 from flask import escape
 
@@ -144,8 +145,7 @@ def get_winner_from_fixture(fixtureID):
     db = google.cloud.firestore.Client()
     fixtures_ref = db.collection(u'fixtures')
 
-    ref = fixtures_ref \
-        .where('fixture.id', '==', fixtureID)
+    ref = fixtures_ref.where('fixture.id', '==', fixtureID)
 
     query = ref.stream()
 
@@ -186,8 +186,7 @@ def tag_tips(request):
 
     # Query data
     tips_ref = db.collection('eventTips')
-    ref = tips_ref \
-        .where('created', '>=', datetime.datetime(int(year), int(month), int(day)))
+    ref = tips_ref.where('created', '>=', datetime.datetime(int(year), int(month), int(day)))
 
     docs = ref.stream()
 
@@ -220,6 +219,107 @@ def tag_tips(request):
 
     retval = 'date:{0}-{1}-{2}, query count:{3}, cache size:{4}'.format(year, month, day, count, len(cache))
     return retval
+
+
+def DB_name_to_CSV_name(name):
+    """
+    string in expression is from DB
+    string in return is from csv files
+    """
+
+    if name == 'Wolves':
+        return 'Wolverhampton Wanderers'
+    if name == 'Atletico Madrid':
+        return 'Atlético Madrid'
+    if name == 'Athletic Club':
+        return 'Athletic Bilbao'
+    if name == 'Deportivo La Coruna':
+        return 'Deportivo La Coruña'
+    if name == 'Malaga':
+        return 'Málaga CF'
+    if name == 'Alaves':
+        return 'CD Alavés'
+    if name == 'Leganes':
+        return 'CD Leganés'
+    if name == 'Sporting Gijon':
+        return 'Sporting Gijón'
+    if name == 'Sheffield Utd':
+        return 'Sheffield United'
+    if name == 'QPR':
+        return 'Queens Park Rangers'
+    if name == 'Almeria':
+        return 'UD Almería'
+    if name == 'Cordoba':
+        return 'Córdoba CF'
+    if name == 'Cadiz':
+        return 'Cádiz CF'
+    return name
+
+
+def storage(request):
+    request_args = request.args
+
+    if request_args and 'id' in request_args:
+        print("inside if")
+        fixtureID = request_args['id']
+
+        db = google.cloud.firestore.Client()
+
+        doc_ref = db.collection(u'fixtures').document(fixtureID)
+        doc = doc_ref.get()
+        data = doc.to_dict()
+        print(data)
+
+        home = data['teams']['home']['name']
+        away = data['teams']['away']['name']
+        # score = '%d:%d' % (data['score']['fulltime']['home'], data['score']['fulltime']['away'])
+        league = 'PL' if data['league']['id'] == 39 else 'PD'
+        season = data['league']['season']
+        season_round = int(data['league']['round'].split("-")[1])
+        print("season_round:", season_round)
+
+        full_league = 'Premier League' if league == 'PL' else 'Primera División'
+        file_name = '%s %d-%d - %d.csv' % (full_league, season, season + 1, int(season_round) - 1)
+        print("file_name:", file_name)
+        if season_round != 1 and season_round != 0:
+            client = google.cloud.storage.Client()
+            bucket = client.get_bucket('better-gsts.appspot.com')
+            blob = bucket.get_blob(file_name)
+            file_text = blob.download_as_string()
+            print(file_text)
+            lines = str(file_text).split("\\r\\n")
+            print("lines:", lines)
+            for line in lines:
+                if line.__contains__(DB_name_to_CSV_name(home)):
+                    print("line: ", line)
+                    line_values = line.split(',')
+                    HR = line_values[0]
+                    HW = line_values[3]
+                    HD = line_values[4]
+                    HL = line_values[5]
+                    HGF = line_values[6].split(':')[0]
+                    HGA = line_values[6].split(':')[1]
+                    HS = line_values[8]
+                if line.__contains__(DB_name_to_CSV_name(away)):
+                    print("line: ", line)
+                    line_values = line.split(',')
+                    AR = line_values[0]
+                    AW = line_values[3]
+                    AD = line_values[4]
+                    AL = line_values[5]
+                    AGF = line_values[6].split(':')[0]
+                    AGA = line_values[6].split(':')[1]
+                    AS = line_values[8]
+
+        else:
+            HR = HW = HL = HD = HGF = HGA = HS = AR = AW = AL = AD = AGF = AGA = AS = '0'
+
+        vector = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
+            HR, HW, HL, HD, HGF, HGA, HS, AR, AW, AL, AD, AGF, AGA, AS)
+
+        return vector
+    else:
+        return "Error: bad args"
 
 
 def hello_http(request):
