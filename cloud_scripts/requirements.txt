@@ -2,4 +2,6 @@ requests
 google.cloud.firestore
 google.cloud.storage
 flask
+numpy
+sklearn
 functions-framework==2.1.3

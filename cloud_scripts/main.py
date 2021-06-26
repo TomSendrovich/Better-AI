@@ -1,11 +1,13 @@
 import datetime
 import json
+import pickle
 from datetime import date
 
 import google.cloud.firestore
 import google.cloud.storage
 import requests
 from flask import escape
+import numpy as np
 
 
 def fetch_data_from_api(url):
@@ -256,11 +258,11 @@ def DB_name_to_CSV_name(name):
     return name
 
 
+# to deploy function from console: 'gcloud functions deploy storage'
 def storage(request):
     request_args = request.args
 
     if request_args and 'id' in request_args:
-        print("inside if")
         fixtureID = request_args['id']
 
         db = google.cloud.firestore.Client()
@@ -268,56 +270,70 @@ def storage(request):
         doc_ref = db.collection(u'fixtures').document(fixtureID)
         doc = doc_ref.get()
         data = doc.to_dict()
-        print(data)
-
-        home = data['teams']['home']['name']
-        away = data['teams']['away']['name']
-        # score = '%d:%d' % (data['score']['fulltime']['home'], data['score']['fulltime']['away'])
-        league = 'PL' if data['league']['id'] == 39 else 'PD'
-        season = data['league']['season']
-        season_round = int(data['league']['round'].split("-")[1])
-        print("season_round:", season_round)
-
-        full_league = 'Premier League' if league == 'PL' else 'Primera División'
-        file_name = '%s %d-%d - %d.csv' % (full_league, season, season + 1, int(season_round) - 1)
-        print("file_name:", file_name)
-        if season_round != 1 and season_round != 0:
-            client = google.cloud.storage.Client()
-            bucket = client.get_bucket('better-gsts.appspot.com')
-            blob = bucket.get_blob(file_name)
-            file_text = blob.download_as_string()
-            print(file_text)
-            lines = str(file_text).split("\\r\\n")
-            print("lines:", lines)
-            for line in lines:
-                if line.__contains__(DB_name_to_CSV_name(home)):
-                    print("line: ", line)
-                    line_values = line.split(',')
-                    HR = line_values[0]
-                    HW = line_values[3]
-                    HD = line_values[4]
-                    HL = line_values[5]
-                    HGF = line_values[6].split(':')[0]
-                    HGA = line_values[6].split(':')[1]
-                    HS = line_values[8]
-                if line.__contains__(DB_name_to_CSV_name(away)):
-                    print("line: ", line)
-                    line_values = line.split(',')
-                    AR = line_values[0]
-                    AW = line_values[3]
-                    AD = line_values[4]
-                    AL = line_values[5]
-                    AGF = line_values[6].split(':')[0]
-                    AGA = line_values[6].split(':')[1]
-                    AS = line_values[8]
-
+        if data is None:
+            return "fixture id not found"
         else:
-            HR = HW = HL = HD = HGF = HGA = HS = AR = AW = AL = AD = AGF = AGA = AS = '0'
+            print('fixture %s found' % doc.id)
 
-        vector = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
-            HR, HW, HL, HD, HGF, HGA, HS, AR, AW, AL, AD, AGF, AGA, AS)
+            home = data['teams']['home']['name']
+            away = data['teams']['away']['name']
+            league = 'PL' if data['league']['id'] == 39 else 'PD'
+            season = data['league']['season']
+            season_round = int(data['league']['round'].split("-")[1])
+            print("season_round:", season_round)
 
-        return vector
+            full_league = 'Premier League' if league == 'PL' else 'Primera División'
+            file_name = '%s %d-%d - %d.csv' % (full_league, season, season + 1, int(season_round) - 1)
+            print("file_name:", file_name)
+            if season_round != 1 and season_round != 0:
+                client = google.cloud.storage.Client()
+                bucket = client.get_bucket('better-gsts.appspot.com')
+                blob = bucket.get_blob(file_name)
+                file_text = blob.download_as_text()
+                # print(file_text)
+                lines = file_text.split("\r\n")
+                # print("lines:", lines)
+                for line in lines:
+                    if line.__contains__(DB_name_to_CSV_name(home)):
+                        # print("line: ", line)
+                        line_values = line.split(',')
+                        HR = line_values[0]
+                        HW = line_values[3]
+                        HD = line_values[4]
+                        HL = line_values[5]
+                        HGF = line_values[6].split(':')[0]
+                        HGA = line_values[6].split(':')[1]
+                        HS = line_values[8]
+                    if line.__contains__(DB_name_to_CSV_name(away)):
+                        # print("line: ", line)
+                        line_values = line.split(',')
+                        AR = line_values[0]
+                        AW = line_values[3]
+                        AD = line_values[4]
+                        AL = line_values[5]
+                        AGF = line_values[6].split(':')[0]
+                        AGA = line_values[6].split(':')[1]
+                        AS = line_values[8]
+
+            else:
+                HR = HW = HL = HD = HGF = HGA = HS = AR = AW = AL = AD = AGF = AGA = AS = '0'
+
+            vector = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' % (
+                HR, HW, HL, HD, HGF, HGA, HS, AR, AW, AL, AD, AGF, AGA, AS)
+
+            vector_np = np.array([np.fromstring(vector, dtype=int, sep=',')])
+            print("vector_np:", vector_np)
+
+            loaded_model = pickle.load(bucket.get_blob("model.sav").open(mode='rb'))
+            result = loaded_model.predict(vector_np)[0]
+            print("model result:", result)
+
+            doc_ref.set({
+                'vector': vector,
+                'prediction': int(result)
+            }, merge=True)
+
+            return str(result)
     else:
         return "Error: bad args"
 
