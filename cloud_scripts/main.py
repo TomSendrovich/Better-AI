@@ -325,12 +325,12 @@ def storage(request):
             print("vector_np:", vector_np)
 
             loaded_model = pickle.load(bucket.get_blob("model.sav").open(mode='rb'))
-            result = loaded_model.predict(vector_np)[0]
+            result = loaded_model.predict_proba(vector_np)[0]
             print("model result:", result)
 
             doc_ref.set({
                 'vector': vector,
-                'prediction': int(result)
+                'prediction': result.tolist()
             }, merge=True)
 
             return str(result)
